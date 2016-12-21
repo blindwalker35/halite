@@ -1,12 +1,55 @@
-import hlt
-from hlt import NORTH, EAST, SOUTH, WEST, STILL, Move, Square
-import random
+from hlt import *
+from networking import *
+import logging
 
+logging.basicConfig(filename='Blindbot1.0.log',level=logging.DEBUG)
 
-myID, game_map = hlt.get_init()
-hlt.send_init("MyPythonBot")
+myID, gameMap = getInit()
+sendInit("BlindwalkerBot_1.0")
+
+def identifyNeighbors(location):
+    neighbors = {}
+    for direction in CARDINALS:
+        neighbour_site = gameMap.getSite(location, direction)
+        if(neighbour_site.owner != myID):
+            neighbors[direction] = "E"
+        else:
+            neighbors[direction] = "A"
+    return neighbors
+
+def direction(site,location):
+    if(site.strength == 0):
+        return Move(location, STILL)
+    neighbors = identifyNeighbors(location)
+    numAllies = 0
+    numEnemies = 0
+    enemies = {}
+    for direction in neighbors:
+        if neighbors[direction] is "A":
+            numAllies+=1
+        else:
+            enemies[direction] = gameMap.getSite(location,direction).strength
+            numEnemies+=1
+
+    if(numAllies == 4):
+        return Move(location,random.choice(DIRECTIONS))
+    else:
+        for direction in enemies:
+            if(site.strength > enemies[direction]):
+                return Move(location, direction)
+    return Move(location, STILL)
+
+def move(location):
+    site = gameMap.getSite(location)
+    target_direction = direction(site,location)
+    return target_direction
 
 while True:
-    game_map.get_frame()
-    moves = [Move(square, random.choice((NORTH, EAST, SOUTH, WEST, STILL))) for square in game_map if square.owner == myID]
-    hlt.send_frame(moves)
+    moves = []
+    gameMap = getFrame()
+    for y in range(gameMap.height):
+        for x in range(gameMap.width):
+            location = Location(x, y)
+            if gameMap.getSite(location).owner == myID:
+                moves.append(move(location))
+    sendFrame(moves)

@@ -1,7 +1,11 @@
 #!/bin/bash
 
 if hash python3 2>/dev/null; then
-    ./halite -d "30 30" "python3 MyBot.py" "python3 RandomBot.py"
+	rm *.log
+	rm *.hlt
+    ./halite -d "30 30" "python3 BlindwalkerBot.py" "python3 1.0-BlindwalkerBot-RandomInternalMovement.py"
 else
-    ./halite -d "30 30" "python MyBot.py" "python RandomBot.py"
+	rm *.log
+	rm *.hlt
+    ./halite -d "30 30" "python BlindwalkerBot.py" "python 1.0-BlindwalkerBot-RandomInternalMovement.py"
 fi
